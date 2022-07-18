@@ -1,6 +1,6 @@
 let game = document.getElementById("game");
-let score = document.getElementById("score");
-
+const scoreDisplay = document.getElementById("score");
+let score = 0;
 const jeopardyCategories = [
   {
     genre: "WHO",
@@ -150,7 +150,56 @@ function addCategory(category) {
     card.setAttribute("data-answer-1", question.answers[0]);
     card.setAttribute("data-answer-2", question.answers[1]);
     card.setAttribute("data-value", card.getInnerHTML());
+    card.addEventListener("click", flipCard);
   });
+}
+function flipCard() {
+  this.innerHTML = "";
+  this.style.fontSize = "15px";
+  this.style.lineHeight = "30px";
+  const textDisplay = document.createElement("div");
+  textDisplay.classList.add("card-text");
+  const firstButton = document.createElement("button");
+  const secondButton = document.createElement("button");
+  firstButton.classList.add("first-button");
+  secondButton.classList.add("second-button");
+  firstButton.innerHTML = this.getAttribute("data-answer-1");
+  secondButton.innerHTML = this.getAttribute("data-answer-2");
+  firstButton.addEventListener("click", getResult);
+  secondButton.addEventListener("click", getResult);
+  this.append(textDisplay, firstButton, secondButton);
+  textDisplay.innerHTML = this.getAttribute("data-question");
+
+  const allCards = Array.from(document.querySelectorAll(".card"));
+  allCards.forEach((card) => card.removeEventListener("click", flipCard));
+}
+
+function getResult() {
+  const allCards = Array.from(document.querySelectorAll(".card"));
+  allCards.forEach((card) => card.addEventListener("click", flipCard));
+
+  const cardOfButton = this.parentElement;
+
+  if (cardOfButton.getAttribute("data-correct") == this.innerHTML) {
+    score = score + parseInt(cardOfButton.getAttribute("data-value"));
+    scoreDisplay.innerHTML = score;
+    cardOfButton.classList.add("correct-answer");
+    setTimeout(() => {
+      while (cardOfButton.firstChild) {
+        cardOfButton.removeChild(cardOfButton.lastChild);
+      }
+      cardOfButton.innerHTML = cardOfButton.getAttribute("data-value");
+    }, 100);
+  } else {
+    cardOfButton.classList.add("wrong-answer");
+    setTimeout(() => {
+      while (cardOfButton.firstChild) {
+        cardOfButton.removeChild(cardOfButton.lastChild);
+      }
+      cardOfButton.innerHTML = 0;
+    }, 100);
+  }
+  cardOfButton.removeEventListener("click", flipCard);
 }
 
 jeopardyCategories.forEach((category) => addCategory(category));
